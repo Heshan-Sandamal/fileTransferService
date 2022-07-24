@@ -45,11 +45,7 @@ public class UDPConnectorImpl implements UdpConnector {
 
     @Override
     public void send(String message, InetAddress receiverAddress, int port) throws IOException {
-//        byte[] buffer = message.getBytes();
-//        DatagramPacket packet = new DatagramPacket(
-//                buffer, buffer.length, receiverAddress, port);
-//        socket.send(packet);
-
+        System.out.println("Calling endpoint " + "http://localhost:" + port + "/");
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(message);
         String foo = restTemplate.postForObject("http://localhost:" + port + "/", request, String.class);
@@ -58,7 +54,7 @@ public class UDPConnectorImpl implements UdpConnector {
     }
 
     public void sendServerRegister(String message, InetAddress receiverAddress, int port) throws IOException {
-                byte[] buffer = message.getBytes();
+        byte[] buffer = message.getBytes();
         DatagramPacket packet = new DatagramPacket(
                 buffer, buffer.length, receiverAddress, port);
         socket.send(packet);

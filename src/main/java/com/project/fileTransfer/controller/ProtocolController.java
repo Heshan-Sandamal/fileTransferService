@@ -24,6 +24,7 @@ public class ProtocolController {
 
     @PostMapping("/")
     public String receive(@RequestBody String data) {
+        System.out.println("Received data " + data);
         final Future<String> submit = (Future<String>) executorService.submit(() -> handler.handleResponse(data));
         return "Success";
     }
