@@ -1,0 +1,112 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.d2s2.ui;
+
+import com.d2s2.constants.ApplicationConstants;
+import com.d2s2.models.Node;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ *
+ * @author Heshan Sandamal
+ */
+public class FileSearchInterface extends javax.swing.JFrame {
+
+    private DefaultTableModel dtmForSearchResultTable;
+    private DefaultTableModel dtmForSelfFileTable;
+    private DefaultTableModel dtmForPeerTable;
+    private DefaultTableModel dtmForstatTable;
+
+
+
+    public FileSearchInterface(GUIController guiController, ArrayList<String> fileList) {
+        initComponents();
+        this.selfFilesTable.getTableHeader().setVisible(false);
+        this.userNameTextField.setText(ApplicationConstants.USER_NAME);
+        this.ipTextField.setText(ApplicationConstants.IP);
+        this.portTextField.setText(String.valueOf(ApplicationConstants.PORT));
+
+
+        this.searchButton.addActionListener(evt -> {
+            dtmForSearchResultTable.setRowCount(0);
+            guiController.searchFile(this.searchTextField.getText());
+        });
+
+        this.registerButton.addActionListener(evt -> {
+            try {
+                guiController.registerInBS();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        this.unregisterButton.addActionListener(evt -> {
+            guiController.unRegister();
+        });
+
+        dtmForSearchResultTable = (DefaultTableModel) searchResultsTable.getModel();
+        dtmForSearchResultTable.setRowCount(0);
+
+        dtmForSelfFileTable = (DefaultTableModel) selfFilesTable.getModel();
+
+        dtmForPeerTable= (DefaultTableModel) peerTable.getModel();
+        dtmForPeerTable.setRowCount(0);
+
+        dtmForstatTable= (DefaultTableModel) statTable.getModel();
+        dtmForstatTable.setRowCount(0);
+
+        for (int x = 0; x < fileList.size(); x++) {
+            dtmForSelfFileTable.setValueAt(fileList.get(x).replace("@", " ").toString(), 0, x);
+        }
+    }
+
+    public synchronized void addToTable(String nodeIp, int port, int fileCount, HashSet<String> fileList, int ttl) {
+        System.out.println("Calling interface " + nodeIp + port);
+        StringBuilder fileNames = new StringBuilder();
+        for (String fileName : fileList) {
+            fileNames.append(fileName.replace("@", " ")).append(" , ");
+        }
+        int noOfHops = ApplicationConstants.HOPS - 1 - ttl;
+        if (!this.isValueExistsAtTable(nodeIp, port)) {
+            this.dtmForSearchResultTable.addRow(new Object[]{nodeIp, port, fileCount, fileNames.toString(), noOfHops});
+        }
+    }
+
+    private boolean isValueExistsAtTable(String ip, int port) {
+        int rowCount = this.dtmForSearchResultTable.getRowCount();
+        for (int i = 0; i < rowCount; i++) {
+            String nodeIp = String.valueOf(dtmForSearchResultTable.getValueAt(i, 0));
+            int nodePort = Integer.parseInt(dtmForSearchResultTable.getValueAt(i, 1).toString());
+
+            if (nodeIp.equals(ip) && nodePort == port) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public String showInputDialog(String message) {
+        return JOptionPane.showInputDialog(this, message);
+    }
+    // End of variables declaration//GEN-END:variables
+
+
+    public void populatePeerTable(Set<Node> peerList){
+        dtmForPeerTable.setRowCount(0);
+        for(Node node:peerList){
+            dtmForPeerTable.addRow(new Object[]{node.getNodeIp(),node.getPort()});
+        }
+    }
